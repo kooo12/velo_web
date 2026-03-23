@@ -14,33 +14,43 @@ class FloatingNavbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: GlassContainer(
-          radius: 32,
-          blur: 20,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _logo(),
-              const SizedBox(width: 48),
-              _navLink('Home'),
-              _navLink('About'),
-              _navLink('Features'),
-              _navLink('FAQ'),
-              const SizedBox(width: 32),
-              _downloadButton(),
-            ],
+    return LayoutBuilder(builder: (context, constraints) {
+      final isMobile = MediaQuery.of(context).size.width < 900;
+      final isSmallMobile = MediaQuery.of(context).size.width < 600;
+
+      return Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: GlassContainer(
+            radius: 32,
+            blur: 20,
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallMobile ? 12 : 24,
+              vertical: 4,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _logo(isSmallMobile),
+                if (!isMobile) ...[
+                  const SizedBox(width: 48),
+                  _navLink('Home'),
+                  _navLink('About'),
+                  _navLink('Features'),
+                  _navLink('FAQ'),
+                ],
+                SizedBox(width: isMobile ? 16 : 32),
+                _downloadButton(isSmallMobile),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
-  Widget _logo() {
+  Widget _logo(bool isSmallMobile) {
     return Row(
       children: [
         Container(
@@ -52,15 +62,17 @@ class FloatingNavbar extends StatelessWidget {
           ),
           child: const Icon(Icons.music_note, color: Colors.black, size: 20),
         ),
-        const SizedBox(width: 12),
-        const Text(
-          'Velo Music',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -0.5,
+        if (!isSmallMobile) ...[
+          const SizedBox(width: 12),
+          const Text(
+            'Velo Music',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -82,7 +94,7 @@ class FloatingNavbar extends StatelessWidget {
     );
   }
 
-  Widget _downloadButton() {
+  Widget _downloadButton(bool isSmallMobile) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -99,13 +111,16 @@ class FloatingNavbar extends StatelessWidget {
       ),
       child: ElevatedButton.icon(
         onPressed: onDownloadPressed,
-        icon: const Icon(Icons.download, size: 18),
-        label: const Text('Download'),
+        icon: Icon(Icons.download, size: isSmallMobile ? 16 : 18),
+        label: Text(isSmallMobile ? 'Get App' : 'Download'),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.black,
           shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+          padding: EdgeInsets.symmetric(
+            horizontal: isSmallMobile ? 16 : 24,
+            vertical: isSmallMobile ? 14 : 18,
+          ),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         ),

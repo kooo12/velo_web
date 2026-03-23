@@ -85,8 +85,9 @@ class _LandingPageState extends State<LandingPage> {
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        const SizedBox(height: 30),
                         _heroText(),
-                        const SizedBox(height: 80),
+                        const SizedBox(height: 50),
                         _heroImage(),
                       ],
                     )
@@ -424,6 +425,7 @@ class _LandingPageState extends State<LandingPage> {
   Widget _buildFeatures({Key? key}) {
     return _sectionWrapper(
       key: key,
+      maxWidth: 2000,
       child: LayoutBuilder(builder: (context, constraints) {
         final isMobile = constraints.maxWidth < 900;
         return Column(
@@ -474,61 +476,64 @@ class _LandingPageState extends State<LandingPage> {
                 ],
               )
             else
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'THE ECOSYSTEM',
-                          style: TextStyle(
-                            color: Colors.cyanAccent,
-                            fontSize: 14,
-                            letterSpacing: 2,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        RichText(
-                          text: const TextSpan(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 85.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'THE ECOSYSTEM',
                             style: TextStyle(
-                              fontSize: 56,
+                              color: Colors.cyanAccent,
+                              fontSize: 14,
+                              letterSpacing: 2,
                               fontWeight: FontWeight.bold,
-                              height: 1.1,
-                              fontFamily: 'Outfit',
-                              color: Colors.white,
                             ),
-                            children: [
-                              TextSpan(text: 'Engineered for the\n'),
-                              TextSpan(
-                                text: 'Audiophile',
-                                style: TextStyle(color: Color(0xFFFF4081)),
-                              ),
-                              TextSpan(text: '.'),
-                            ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          RichText(
+                            text: const TextSpan(
+                              style: TextStyle(
+                                fontSize: 56,
+                                fontWeight: FontWeight.bold,
+                                height: 1.1,
+                                fontFamily: 'Outfit',
+                                color: Colors.white,
+                              ),
+                              children: [
+                                TextSpan(text: 'Engineered for the\n'),
+                                TextSpan(
+                                  text: 'Audiophile',
+                                  style: TextStyle(color: Color(0xFFFF4081)),
+                                ),
+                                TextSpan(text: '.'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        'We stripped away the noise to leave only the music. Precision tools for your sonic journey.',
-                        style: TextStyle(
-                          color: Colors.white.withAlpha(150),
-                          fontSize: 18,
-                          height: 1.5,
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          'We stripped away the noise to leave only the music. Precision tools for your sonic journey.',
+                          style: TextStyle(
+                            color: Colors.white.withAlpha(150),
+                            fontSize: 18,
+                            height: 1.5,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             const SizedBox(height: 80),
             FeatureMarquee(
@@ -966,14 +971,17 @@ class _LandingPageState extends State<LandingPage> {
     );
   }
 
-  Widget _sectionWrapper({required Widget child, Key? key}) {
+  Widget _sectionWrapper(
+      {required Widget child, Key? key, double maxWidth = 1200}) {
+    final isMobile = MediaQuery.of(context).size.width < 900;
     return Container(
       key: key,
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 100),
+      padding:
+          EdgeInsets.symmetric(horizontal: 50, vertical: isMobile ? 20 : 100),
       child: Center(
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 1200),
+          constraints: BoxConstraints(maxWidth: maxWidth),
           child: child,
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_container.dart';
 
@@ -53,8 +54,9 @@ class TermsPage extends StatelessWidget {
                     'If you have any questions about these Terms of Service, please contact me at:\n\nEmail: agkooo.ako36@gmail.com\nPhone: +959 969 687 330'),
                 const SizedBox(height: 40),
                 TextButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back, color: AppTheme.accentColor),
+                  onPressed: () => context.go('/'),
+                  icon:
+                      const Icon(Icons.arrow_back, color: AppTheme.accentColor),
                   label: const Text('Back to Home',
                       style: TextStyle(color: AppTheme.accentColor)),
                 ),

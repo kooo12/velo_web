@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_container.dart';
 
@@ -46,7 +47,8 @@ class PrivacyPage extends StatelessWidget {
                 _sectionBody(
                     'You have full control over your data since it is stored on your device. You can delete or modify your data at any time.'),
                 _sectionTitle('6. Cookies and Tracking'),
-                _sectionBody('We do not use cookies or any tracking technologies.'),
+                _sectionBody(
+                    'We do not use cookies or any tracking technologies.'),
                 _sectionTitle('7. Children\'s Privacy'),
                 _sectionBody(
                     'Our application is safe for children as it does not collect any personal information.'),
@@ -55,8 +57,9 @@ class PrivacyPage extends StatelessWidget {
                     'If you have any questions about this Privacy Policy, please contact me at:\n\nEmail: agkooo.ako36@gmail.com\nPhone: +959 969 687 330\n\nWe will respond to your inquiries within 48 hours.'),
                 const SizedBox(height: 40),
                 TextButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back, color: AppTheme.accentColor),
+                  onPressed: () => context.go('/'),
+                  icon:
+                      const Icon(Icons.arrow_back, color: AppTheme.accentColor),
                   label: const Text('Back to Home',
                       style: TextStyle(color: AppTheme.accentColor)),
                 ),
@@ -91,6 +94,5 @@ class PrivacyPage extends StatelessWidget {
         height: 1.6,
       ),
     );
-
   }
 }
