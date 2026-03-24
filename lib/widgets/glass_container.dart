@@ -10,6 +10,7 @@ class GlassContainer extends StatelessWidget {
   final Color? color;
   final double? width;
   final double? height;
+  final double borderWidth;
 
   const GlassContainer({
     super.key,
@@ -21,6 +22,7 @@ class GlassContainer extends StatelessWidget {
     this.color,
     this.width,
     this.height,
+    this.borderWidth = 1.0,
   });
 
   @override
@@ -50,7 +52,7 @@ class GlassContainer extends StatelessWidget {
               borderRadius: BorderRadius.circular(radius),
               border: Border.all(
                 color: Colors.white.withAlpha(30),
-                width: 1.0,
+                width: borderWidth,
               ),
             ),
             child: child,

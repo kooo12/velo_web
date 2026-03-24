@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "velo-muisc"
+  },
+  "targets": {
+    "velo-muisc": {
+      "hosting": {
+        "landing": [
+          "velo-music"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

@@ -74,7 +74,7 @@ class _FeatureMarqueeState extends State<FeatureMarquee> {
       child: ListView.separated(
         controller: _scrollController,
         scrollDirection: Axis.horizontal,
-        // physics: const NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: tripleChildren.length,
         separatorBuilder: (_, __) => const SizedBox(width: 24),
         itemBuilder: (context, index) => tripleChildren[index],

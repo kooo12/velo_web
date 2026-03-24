@@ -20,41 +20,157 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description"
-    content="Velo is a next-generation local music player prioritizing privacy, speed, and premium UI. Ad-free, tracking-free, pure music experience.">
+    content="Experience Velo: The next-generation local music player. High-fidelity audio, complete privacy, and a stunning modern interface.">
   <meta name="keywords"
-    content="music player, local music, privacy music app, offline music, flac player, velo music, no ads music player, premium music ui">
+    content="music player, local music, privacy music app, offline music, flac player, velo music, no ads music player, premium music ui, audiophile player">
   <meta name="robots" content="index, follow">
 
-  <!-- Open Graph / Facebook -->
+  <!-- Open Graph / Facebook / LinkedIn / Telegram -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Velo Music">
   <meta property="og:url" content="https://velo-music.web.app/">
   <meta property="og:title" content="Velo Music Player | Privacy, Speed, Premium UI">
   <meta property="og:description"
-    content="Rediscover your music with Velo. The high-performance, private, and beautiful local music player.">
-  <meta property="og:image" content="assets/images/hero.png">
+    content="Rediscover your music with Velo. High-performance, private, and beautiful local music player for Android.">
+  <meta property="og:image" content="https://velo-music.web.app/assets/images/velo_promotional_image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_US">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://velo-music.web.app/">
   <meta property="twitter:title" content="Velo Music Player | Privacy, Speed, Premium UI">
   <meta property="twitter:description"
-    content="Rediscover your music with Velo. The high-performance, private, and beautiful local music player.">
-  <meta property="twitter:image" content="assets/images/hero.png">
+    content="Rediscover your music with Velo. High-performance, private, and beautiful local music player for Android.">
+  <meta property="twitter:image" content="https://velo-music.web.app/assets/images/velo_promotional_image.png">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="velo_web">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="Velo Music">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>Velo Music Player | Privacy, Speed, Premium UI</title>
+  <title>Velo Music | Professional Grade Private Music Player</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #134e5e;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #loading-indicator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      color: white;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .logo {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 2rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      background: linear-gradient(to bottom, #ffffff, #b2fefa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: pulse 2.5s infinite ease-in-out;
+      filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+    }
+
+    .loader {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-left-color: #ffffff;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1.2s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 0.7;
+        transform: scale(0.95);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Add a subtle glassmorphism effect for the container if needed */
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      border-radius: 20px;
+    }
+  </style>
 </head>
 
 <body>
+  <div id="loading-indicator">
+    <div class="loading-content">
+      <div class="logo">Velo</div>
+      <span class="loader"></span>
+    </div>
+  </div>
+  <script>
+    // MutationObserver to remove the loading indicator once the Flutter app is mounted
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.addedNodes.length) {
+          for (const node of mutation.addedNodes) {
+            if (node.tagName === 'FLUTTER-VIEW' || node.tagName === 'CANVAS') {
+              const indicator = document.getElementById('loading-indicator');
+              if (indicator) {
+                indicator.style.opacity = '0';
+                setTimeout(() => indicator.remove(), 500);
+              }
+              observer.disconnect();
+              return;
+            }
+          }
+        }
+      }
+    });
+
+    observer.observe(document.body, { childList: true });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 

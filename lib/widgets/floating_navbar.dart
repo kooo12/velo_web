@@ -38,6 +38,7 @@ class FloatingNavbar extends StatelessWidget {
                   _navLink('Home'),
                   _navLink('About'),
                   _navLink('Features'),
+                  _navLink('Demo'),
                   _navLink('FAQ'),
                 ],
                 SizedBox(width: isMobile ? 16 : 32),
@@ -52,15 +53,13 @@ class FloatingNavbar extends StatelessWidget {
 
   Widget _logo(bool isSmallMobile) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: AppTheme.accentColor,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(Icons.music_note, color: Colors.black, size: 20),
+        Image.asset(
+          'assets/images/app_icon.png',
+          width: 42,
+          height: 42,
         ),
         if (!isSmallMobile) ...[
           const SizedBox(width: 12),
@@ -70,6 +69,7 @@ class FloatingNavbar extends StatelessWidget {
               fontSize: 20,
               fontWeight: FontWeight.bold,
               letterSpacing: -0.5,
+              color: Colors.white,
             ),
           ),
         ],

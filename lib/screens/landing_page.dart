@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:velo_web/widgets/feature_marquee.dart';
@@ -7,14 +10,17 @@ import '../widgets/glass_container.dart';
 import '../widgets/faq_accordion.dart';
 import '../widgets/floating_navbar.dart';
 
-class LandingPage extends StatefulWidget {
+import '../providers/faq/faq_notifier.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class LandingPage extends ConsumerStatefulWidget {
   const LandingPage({super.key});
 
   @override
-  State<LandingPage> createState() => _LandingPageState();
+  ConsumerState<LandingPage> createState() => _LandingPageState();
 }
 
-class _LandingPageState extends State<LandingPage> {
+class _LandingPageState extends ConsumerState<LandingPage> {
   final ScrollController _scrollController = ScrollController();
 
   final GlobalKey _heroKey = GlobalKey();
@@ -22,6 +28,36 @@ class _LandingPageState extends State<LandingPage> {
   final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _faqKey = GlobalKey();
   final GlobalKey _downloadKey = GlobalKey();
+  final GlobalKey _demoKey = GlobalKey();
+
+  // FAQ Form State
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _questionController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _questionController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    dotenv.load(fileName: ".env");
+    // ui_web.platformViewRegistry.registerViewFactory(
+    //   'velo-demo',
+    //   (int viewId) => web.HTMLIFrameElement()
+    //     ..src = 'https://velo-live-demo.web.app/'
+    //     ..style.border = 'none'
+    //     ..style.width = '100%'
+    //     ..style.height = '100%',
+    // );
+  }
 
   void _scrollTo(GlobalKey key) {
     if (key.currentContext != null) {
@@ -36,6 +72,7 @@ class _LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
@@ -47,10 +84,9 @@ class _LandingPageState extends State<LandingPage> {
                 _buildHero(key: _heroKey),
                 _buildAbout(key: _aboutKey),
                 _buildFeatures(key: _featuresKey),
-                _buildScreenshots(),
+                _buildAppDemo(key: _demoKey),
                 _buildFAQ(key: _faqKey),
                 _buildDownloadSection(key: _downloadKey),
-                _buildContact(),
                 _buildFooter(),
               ],
             ),
@@ -61,6 +97,7 @@ class _LandingPageState extends State<LandingPage> {
               if (label == 'Home') _scrollTo(_heroKey);
               if (label == 'About') _scrollTo(_aboutKey);
               if (label == 'Features') _scrollTo(_featuresKey);
+              if (label == 'Demo') _scrollTo(_demoKey);
               if (label == 'FAQ') _scrollTo(_faqKey);
             },
           ),
@@ -77,7 +114,8 @@ class _LandingPageState extends State<LandingPage> {
         return Container(
           constraints:
               BoxConstraints(minHeight: MediaQuery.of(context).size.height),
-          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 50),
+          padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 20 : 50, vertical: 50),
           child: Center(
             child: Container(
               constraints: const BoxConstraints(maxWidth: 1200),
@@ -85,7 +123,7 @@ class _LandingPageState extends State<LandingPage> {
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 40),
                         _heroText(),
                         const SizedBox(height: 50),
                         _heroImage(),
@@ -142,37 +180,41 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Widget _heroImage() {
-    return Center(
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 300,
-            height: 300,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.accentColor.withAlpha(40),
-                  blurRadius: 100,
-                  spreadRadius: 50,
-                ),
-              ],
+    return GestureDetector(
+      onTap: () => _scrollTo(_demoKey),
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.accentColor.withAlpha(40),
+                    blurRadius: 100,
+                    spreadRadius: 50,
+                  ),
+                ],
+              ),
             ),
-          ),
-          Image.asset(
-            'assets/images/hero.png',
-            fit: BoxFit.contain,
-            height: 600,
-          )
-              .animate(onPlay: (controller) => controller.repeat(reverse: true))
-              .moveY(
-                  begin: 0,
-                  end: -20,
-                  duration: 3.seconds,
-                  curve: Curves.easeInOutSine)
-          // .fadeIn(duration: 1.seconds),
-        ],
+            Image.asset(
+              'assets/images/home_screen.png',
+              fit: BoxFit.contain,
+              height: 600,
+            )
+                .animate(
+                    onPlay: (controller) => controller.repeat(reverse: true))
+                .moveY(
+                    begin: 0,
+                    end: -20,
+                    duration: 3.seconds,
+                    curve: Curves.easeInOutSine)
+            // .fadeIn(duration: 1.seconds),
+          ],
+        ),
       ),
     );
   }
@@ -243,7 +285,7 @@ class _LandingPageState extends State<LandingPage> {
                 ],
               )
             : Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(flex: 12, child: _missionCard()),
@@ -257,7 +299,7 @@ class _LandingPageState extends State<LandingPage> {
 
   Widget _missionCard() {
     return Container(
-      padding: const EdgeInsets.all(64),
+      padding: const EdgeInsets.all(34),
       decoration: BoxDecoration(
         color: AppTheme.forestMistStart,
         borderRadius: BorderRadius.circular(40),
@@ -316,15 +358,20 @@ class _LandingPageState extends State<LandingPage> {
           const SizedBox(height: 64),
           Row(
             children: [
-              Container(
+              // Container(
+              //   width: 56,
+              //   height: 56,
+              //   decoration: BoxDecoration(
+              //     shape: BoxShape.circle,
+              //     border: Border.all(color: Colors.white24, width: 2),
+              //   ),
+              //   child:
+              //       const Icon(Icons.music_note, color: Colors.white, size: 24),
+              // ),
+              Image.asset(
+                'assets/images/app_icon.png',
                 width: 56,
                 height: 56,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white24, width: 2),
-                ),
-                child:
-                    const Icon(Icons.music_note, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 20),
               const Column(
@@ -736,7 +783,7 @@ class _LandingPageState extends State<LandingPage> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Image.asset(
-                            'assets/images/hero.png',
+                            'assets/images/home_screen.png',
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -768,7 +815,7 @@ class _LandingPageState extends State<LandingPage> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
-                      'assets/images/hero.png',
+                      'assets/images/home_screen.png',
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -780,154 +827,852 @@ class _LandingPageState extends State<LandingPage> {
     );
   }
 
-  Widget _buildScreenshots() {
+  Widget _buildAppDemo({Key? key}) {
     return _sectionWrapper(
-      child: Column(
-        children: [
-          const Text('Beautiful Design',
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 64),
-          SizedBox(
-            height: 500,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              itemCount: 4,
-              separatorBuilder: (context, index) => const SizedBox(width: 40),
-              itemBuilder: (context, index) {
-                return AspectRatio(
-                  aspectRatio: 9 / 19.5,
-                  child: GlassContainer(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.phone_iphone,
-                              size: 48,
-                              color: AppTheme.accentColor.withAlpha(100)),
-                          const SizedBox(height: 16),
-                          Text('View ${index + 1}',
-                              style: const TextStyle(color: Colors.white38)),
-                        ],
+      key: key,
+      child: LayoutBuilder(builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
+        return Column(
+          children: [
+            const Text('Experience Velo',
+                style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 24),
+            Text(
+              'Try the live interactive demo below to see how Velo transforms your music experience.',
+              textAlign: TextAlign.center,
+              style:
+                  TextStyle(color: Colors.white.withAlpha(150), fontSize: 18),
+            ),
+            const SizedBox(height: 64),
+            isMobile
+                ? Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () =>
+                            launchWeb('https://velo-live-demo.web.app'),
+                        child: Image.asset(
+                          'assets/images/home_screen.png',
+                          fit: BoxFit.contain,
+                          height: 600,
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Column(
+                        children: [
+                          _demoButton(),
+                          const SizedBox(
+                            height: 18,
+                          ),
+                          SizedBox(
+                            width: 300,
+                            child: Text(
+                              'Experience the full interface right in your browser. Test the fluid animations, explore the layout, and see why Velo is the choice for audiophiles.',
+                              style: TextStyle(
+                                color: Colors.white.withAlpha(150),
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () =>
+                            launchWeb('https://velo-live-demo.web.app'),
+                        child: Image.asset(
+                          'assets/images/home_screen.png',
+                          fit: BoxFit.contain,
+                          height: 600,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 40,
+                      ),
+                      Column(
+                        children: [
+                          _demoButton(),
+                          const SizedBox(
+                            height: 18,
+                          ),
+                          SizedBox(
+                            width: 300,
+                            child: Text(
+                              'Experience the full interface right in your browser. Test the fluid animations, explore the layout, and see why Velo is the choice for audiophiles.',
+                              style: TextStyle(
+                                color: Colors.white.withAlpha(150),
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  )
+          ],
+        );
+      }),
     );
   }
 
-  Widget _buildFAQ({Key? key}) {
-    return _sectionWrapper(
-      key: key,
-      child: const Column(
-        children: [
-          Text('Common Questions',
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-          SizedBox(height: 64),
-          FAQAccordion(
-              question: 'Is it free?',
-              answer:
-                  'Yes, Velo is completely free to use without any ads or subscriptions.'),
-          FAQAccordion(
-              question: 'Does it support local files?',
-              answer:
-                  'Velo is designed specifically for local files, including FLAC, MP3, and WAV.'),
-          FAQAccordion(
-              question: 'How are recommendations generated?',
-              answer:
-                  'Recommendations are processed entirely on-device using smart algorithms based on your listening habits.'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDownloadSection({Key? key}) {
-    return Container(
-      key: key,
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 120, horizontal: 24),
-      child: Center(
+  Widget _demoButton() {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => launchWeb('https://velo-live-demo.web.app'),
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: GlassContainer(
-            padding: const EdgeInsets.all(64),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(Icons.qr_code_2,
-                      size: 160, color: Colors.black),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: AppTheme.forestMistStart,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white24),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.accentColor.withAlpha(100),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+              BoxShadow(
+                color: Colors.black.withAlpha(100),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(FontAwesomeIcons.link, color: Colors.white, size: 24),
+              SizedBox(width: 16),
+              Text(
+                'Try Demo',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Outfit',
                 ),
-                const SizedBox(height: 48),
-                const Text(
-                  'Scan QR Code',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Scan this QR code with your mobile device to download',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.white.withAlpha(150), fontSize: 16),
-                ),
-                const SizedBox(height: 48),
-                _gradientButton('Direct Download', Icons.download,
-                    onPressed: () {}),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildContact() {
+  Future<void> launchWeb(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  Widget _buildFAQ({Key? key}) {
     return _sectionWrapper(
-      child: GlassContainer(
-        padding: const EdgeInsets.all(64),
+      key: key,
+      child: LayoutBuilder(builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
+        return isMobile
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _faqHeader(),
+                  const SizedBox(height: 48),
+                  _faqForm(),
+                  const SizedBox(height: 64),
+                  _faqList(),
+                  const SizedBox(height: 32),
+                  _socialLinks(),
+                ],
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _faqHeader(),
+                        const SizedBox(height: 48),
+                        _faqForm(),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 80),
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _faqList(),
+                        const SizedBox(height: 32),
+                        _socialLinks(),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+      }),
+    );
+  }
+
+  Widget _faqHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _badge('FAQ'),
+        const SizedBox(height: 24),
+        const Text(
+          'Common\nQuestions',
+          style: TextStyle(
+            fontSize: 48,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Outfit',
+            height: 1.1,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Everything you need to know about Velo. Can\'t find the answer? Reach out to our support team.',
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.white.withAlpha(150),
+            height: 1.6,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _faqForm() {
+    final faqState = ref.watch(faqProvider);
+
+    return GlassContainer(
+      padding: const EdgeInsets.all(32),
+      radius: 32,
+      child: Form(
+        key: _formKey,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Support',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 24),
-            const Text('agkooo.ako36@gmail.com',
-                style: TextStyle(fontSize: 18, color: AppTheme.accentColor)),
-            const SizedBox(height: 48),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.telegram, size: 32)),
-                const SizedBox(width: 24),
-                IconButton(
-                    onPressed: () {}, icon: const Icon(Icons.link, size: 32)),
-              ],
+            const Text(
+              'Ask a Question',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Outfit',
+                color: Colors.white,
+              ),
             ),
+            const SizedBox(height: 8),
+            Text(
+              'Can\'t find what you\'re looking for? Ask us directly.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withAlpha(150),
+              ),
+            ),
+            const SizedBox(height: 32),
+            _customTextField(
+              controller: _nameController,
+              label: 'Name',
+              hint: 'John Doe',
+              icon: Icons.person_outline,
+              validator: (v) => v!.isEmpty ? 'Please enter your name' : null,
+            ),
+            const SizedBox(height: 20),
+            _customTextField(
+              controller: _emailController,
+              label: 'Email',
+              hint: 'john@example.com',
+              icon: Icons.email_outlined,
+              validator: (v) {
+                if (v!.isEmpty) return 'Please enter your email';
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(v)) {
+                  return 'Please enter a valid email';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            _customTextField(
+              controller: _questionController,
+              label: 'Question',
+              hint: 'How do I...',
+              icon: Icons.help_outline,
+              maxLines: 4,
+              validator: (v) =>
+                  v!.isEmpty ? 'Please enter your question' : null,
+            ),
+            const SizedBox(height: 32),
+            if (faqState.submissionSuccess)
+              _buildSuccessMessage()
+            else if (faqState.submissionError != null)
+              _buildErrorMessage(faqState.submissionError!)
+            else
+              SizedBox(
+                width: double.infinity,
+                child: _gradientButton(
+                  faqState.isSubmitting ? 'Sending...' : 'Send Message',
+                  faqState.isSubmitting
+                      ? Icons.hourglass_empty
+                      : Icons.send_rounded,
+                  onPressed: faqState.isSubmitting ? () {} : _submitQuestion,
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildSuccessMessage() {
     return Container(
-      padding: const EdgeInsets.all(80),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.all(24),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.greenAccent.withAlpha(20),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.greenAccent.withAlpha(50)),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.check_circle_outline_rounded,
+              color: Colors.greenAccent, size: 48),
+          const SizedBox(height: 16),
+          const Text(
+            'Message Sent!',
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'We\'ll get back to you as soon as possible.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Colors.white70),
+          ),
+          const SizedBox(height: 24),
+          TextButton(
+            onPressed: () => ref.read(faqProvider.notifier).reset(),
+            child: const Text('Send another',
+                style: TextStyle(color: Colors.greenAccent)),
+          ),
+        ],
+      ),
+    ).animate().fadeIn().scale(delay: 100.ms);
+  }
+
+  Widget _buildErrorMessage(String error) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.redAccent.withAlpha(20),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.redAccent.withAlpha(50)),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.error_outline_rounded,
+              color: Colors.redAccent, size: 48),
+          const SizedBox(height: 16),
+          const Text(
+            'Something went wrong',
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 14, color: Colors.white70),
+          ),
+          const SizedBox(height: 24),
+          _gradientButton(
+            'Try Again',
+            Icons.refresh_rounded,
+            onPressed: _submitQuestion,
+          ),
+        ],
+      ),
+    ).animate().shake();
+  }
+
+  Widget _customTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.white70,
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          validator: validator,
+          cursorColor: Colors.white,
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: Colors.white.withAlpha(60)),
+            prefixIcon: Icon(icon,
+                color: AppTheme.accentColor.withAlpha(150), size: 20),
+            filled: true,
+            fillColor: Colors.white.withAlpha(10),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.white.withAlpha(20)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.white.withAlpha(20)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppTheme.accentColor),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _submitQuestion() async {
+    if (_formKey.currentState!.validate()) {
+      await ref.read(faqProvider.notifier).submitQuestion(
+            name: _nameController.text,
+            email: _emailController.text,
+            question: _questionController.text,
+          );
+
+      final state = ref.read(faqProvider);
+      if (state.submissionSuccess) {
+        _nameController.clear();
+        _emailController.clear();
+        _questionController.clear();
+      }
+    }
+  }
+
+  Widget _faqList() {
+    return const Column(
+      children: [
+        FAQAccordion(
+          question: 'Is Velo really free?',
+          answer:
+              'Yes, Velo is 100% free. No ads, no subscriptions, no locked features. We believe great tools should be accessible to everyone.',
+        ),
+        FAQAccordion(
+          question: 'What audio formats are supported?',
+          answer:
+              'Velo supports a wide range of formats including FLAC, MP3, WAV, AAC, and OGG. It is optimized for high-resolution lossless playback.',
+        ),
+        FAQAccordion(
+          question: 'How does the recommendation engine work?',
+          answer:
+              'Our smart algorithms analyze your listening habits entirely on-device. Your data never leaves your phone, ensuring complete privacy while providing personalized discovery.',
+        ),
+        FAQAccordion(
+          question: 'Does it support Hi-Res audio?',
+          answer:
+              'Absolutely. Velo is designed for audiophiles and supports bit-perfect playback for high-resolution formats like FLAC and WAV up to 24-bit/192kHz.',
+        ),
+        FAQAccordion(
+          question: 'Can I use Velo on multiple devices?',
+          answer:
+              'Velo is available for Android only. Since it\'s an offline player, your local library is managed on each device independently.',
+        ),
+        FAQAccordion(
+          question: 'Is there a sleep timer?',
+          answer:
+              'Yes, there is a built-in sleep timer. You can set it to turn off your music automatically after a set duration, perfect for listening before bed.',
+        ),
+        FAQAccordion(
+          question: 'How do I import my music?',
+          answer:
+              'Velo automatically scans your device\'s "Music" folder. You can also manually add specific folders to scan in the app settings.',
+        ),
+        // FAQAccordion(
+        //   question: 'Does it support lyrics?',
+        //   answer:
+        //       'Yes! Velo supports both embedded lyrics in audio files and external .lrc files stored in the same folder as your music.',
+        // ),
+        FAQAccordion(
+          question: 'What makes Velo different from other players?',
+          answer:
+              'Velo combines a premium, high-fidelity audio engine with a beautiful, modern interface and a strict "no-tracking" privacy policy.',
+        ),
+      ],
+    );
+  }
+
+  Widget _socialLinks() {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      children: [
+        _socialIconButton(FontAwesomeIcons.telegram, 'Telegram',
+            () => _launchURL('https://t.me/kooo2109')),
+        _socialIconButton(
+            FontAwesomeIcons.linkedin,
+            'LinkedIn',
+            () => _launchURL(
+                'https://www.linkedin.com/in/aung-ko-oo-042342242/')),
+        _socialIconButton(FontAwesomeIcons.facebook, 'Facebook',
+            () => _launchURL('https://facebook.com/kooo1210')),
+      ],
+    );
+  }
+
+  Future<void> _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      debugPrint('Could not launch $url');
+    }
+  }
+
+  Widget _socialIconButton(IconData icon, String label, VoidCallback onTap) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withAlpha(15),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withAlpha(20)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Outfit',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDownloadSection({Key? key}) {
+    return _sectionWrapper(
+      key: key,
+      child: LayoutBuilder(builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(
+            vertical: isMobile ? 80 : 10,
+            horizontal: 24,
+          ),
+          child: Column(
+            children: [
+              _badge('Download'),
+              const SizedBox(height: 24),
+              const Text(
+                'Get Velo Now',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Outfit',
+                  color: Colors.white,
+                  height: 1.1,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Experience your music like never before. High-fidelity, private, and beautiful.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white.withAlpha(150),
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 64),
+              isMobile
+                  ? Column(
+                      children: [
+                        _buildDownloadCard(isMobile),
+                        const SizedBox(height: 38),
+                        _buildQRCodeCard(isMobile),
+                      ],
+                    )
+                  : IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(child: _buildDownloadCard(isMobile)),
+                          const SizedBox(width: 48),
+                          Expanded(child: _buildQRCodeCard(isMobile)),
+                        ],
+                      ),
+                    ),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildDownloadCard(bool isMobile) {
+    return GlassContainer(
+      padding: const EdgeInsets.all(38),
+      radius: 40,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
+          const Text(
+            'Ready to start?',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Outfit',
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Download Velo for Android and start your high-fidelity music journey today.',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.white.withAlpha(150),
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 40),
+          _playStoreButton(isMobile),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQRCodeCard(bool isMobile) {
+    return GlassContainer(
+      padding: const EdgeInsets.all(38),
+      radius: 40,
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.accentColor.withAlpha(50),
+                      blurRadius: 60,
+                      spreadRadius: 20,
+                    ),
+                  ],
+                ),
+              ),
+              GestureDetector(
+                // onTap: () => _launchURL(
+                //     'https://play.google.com/store/apps/details?id=com.ako.sonus'),
+                onTap: () => _showComingSoonMessage(isMobile),
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(50),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
+                      'assets/images/qr_play_store.png',
+                      width: 100,
+                      height: 100,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          const Text(
+            'Visit Play Store',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Outfit',
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Scan to view Velo on the Google Play Store (Coming Soon).',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white.withAlpha(150),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _playStoreButton(bool isMobile) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        // onTap: () => _launchURL(
+        //     'https://play.google.com/store/apps/details?id=com.ako.sonus'),
+        onTap: () => _showComingSoonMessage(isMobile),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(100),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(FontAwesomeIcons.googlePlay,
+                  color: Colors.white, size: 24),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'GET IT ON',
+                    style: TextStyle(
+                      color: Colors.white.withAlpha(150),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const Text(
+                    'Google Play',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Outfit',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showComingSoonMessage(bool isMobile) {
+    showDialog(
+      context: context,
+      builder: (context) => Center(
+        child: GlassContainer(
+          width: isMobile ? 320 : 400,
+          padding: const EdgeInsets.all(32),
+          radius: 24,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(FontAwesomeIcons.clock, color: Colors.amber, size: 48),
+              const SizedBox(height: 24),
+              const Text(
+                'Coming Soon!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Outfit',
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'We are currently in the Google Play Store review process. Stay tuned for the official release!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white70,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              _gradientButton(
+                'Got it!',
+                Icons.check,
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        ),
+      ).animate().fadeIn().scale(),
+    );
+  }
+
+  Widget _buildFooter() {
+    final isMobile = MediaQuery.of(context).size.width < 900;
+    return Container(
+      padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 10 : 50, vertical: isMobile ? 20 : 80),
+      child: isMobile
+          ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Velo Music',
@@ -940,24 +1685,57 @@ class _LandingPageState extends State<LandingPage> {
                       color: Colors.white.withAlpha(120), height: 1.5),
                 ),
                 const SizedBox(height: 32),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Terms',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    _footerLink('Privacy Policy', () => context.go('/privacy')),
+                    _footerLink('Terms of Service', () => context.go('/terms')),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 const Text('© 2026 Velo Music. All rights reserved.',
                     style: TextStyle(color: Colors.white38)),
               ],
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Velo Music',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Professional-grade offline music player with advanced features like sleep timer, smart library management, and responsive design.',
+                        style: TextStyle(
+                            color: Colors.white.withAlpha(120), height: 1.5),
+                      ),
+                      const SizedBox(height: 32),
+                      const Text('© 2026 Velo Music. All rights reserved.',
+                          style: TextStyle(color: Colors.white38)),
+                    ],
+                  ),
+                ),
+                SizedBox(width: isMobile ? 10 : 80),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Terms',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    _footerLink('Privacy Policy', () => context.go('/privacy')),
+                    _footerLink('Terms of Service', () => context.go('/terms')),
+                  ],
+                ),
+              ],
             ),
-          ),
-          const SizedBox(width: 80),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Terms',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              _footerLink('Privacy Policy', () => context.go('/privacy')),
-              _footerLink('Terms of Service', () => context.go('/terms')),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -977,8 +1755,8 @@ class _LandingPageState extends State<LandingPage> {
     return Container(
       key: key,
       width: double.infinity,
-      padding:
-          EdgeInsets.symmetric(horizontal: 50, vertical: isMobile ? 20 : 100),
+      padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 12 : 50, vertical: isMobile ? 20 : 100),
       child: Center(
         child: Container(
           constraints: BoxConstraints(maxWidth: maxWidth),
