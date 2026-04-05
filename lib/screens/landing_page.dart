@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -30,7 +29,6 @@ class _LandingPageState extends ConsumerState<LandingPage> {
   final GlobalKey _downloadKey = GlobalKey();
   final GlobalKey _demoKey = GlobalKey();
 
-  // FAQ Form State
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -48,7 +46,6 @@ class _LandingPageState extends ConsumerState<LandingPage> {
   @override
   void initState() {
     super.initState();
-    dotenv.load(fileName: ".env");
     // ui_web.platformViewRegistry.registerViewFactory(
     //   'velo-demo',
     //   (int viewId) => web.HTMLIFrameElement()
@@ -76,20 +73,17 @@ class _LandingPageState extends ConsumerState<LandingPage> {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          SingleChildScrollView(
+          CustomScrollView(
             controller: _scrollController,
-            child: Column(
-              children: [
-                // const SizedBox(height: 100),
-                _buildHero(key: _heroKey),
-                _buildAbout(key: _aboutKey),
-                _buildFeatures(key: _featuresKey),
-                _buildAppDemo(key: _demoKey),
-                _buildFAQ(key: _faqKey),
-                _buildDownloadSection(key: _downloadKey),
-                _buildFooter(),
-              ],
-            ),
+            slivers: [
+              SliverToBoxAdapter(child: _buildHero(key: _heroKey)),
+              SliverToBoxAdapter(child: _buildAbout(key: _aboutKey)),
+              SliverToBoxAdapter(child: _buildFeatures(key: _featuresKey)),
+              SliverToBoxAdapter(child: _buildAppDemo(key: _demoKey)),
+              SliverToBoxAdapter(child: _buildFAQ(key: _faqKey)),
+              SliverToBoxAdapter(child: _buildDownloadSection(key: _downloadKey)),
+              SliverToBoxAdapter(child: _buildFooter()),
+            ],
           ),
           FloatingNavbar(
             onDownloadPressed: () => _scrollTo(_downloadKey),
@@ -133,7 +127,12 @@ class _LandingPageState extends ConsumerState<LandingPage> {
                       children: [
                         Expanded(flex: 12, child: _heroText()),
                         const Spacer(flex: 1),
-                        Expanded(flex: 10, child: _heroImage()),
+                        Expanded(
+                            flex: 10,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 50),
+                              child: _heroImage(),
+                            )),
                       ],
                     ),
             ),
@@ -182,7 +181,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
   Widget _heroImage() {
     return GestureDetector(
       onTap: () => _scrollTo(_demoKey),
-      child: Center(
+      child: RepaintBoundary(
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -205,8 +204,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
               fit: BoxFit.contain,
               height: 600,
             )
-                .animate(
-                    onPlay: (controller) => controller.repeat(reverse: true))
+                .animate(onPlay: (controller) => controller.repeat(reverse: true))
                 .moveY(
                     begin: 0,
                     end: -20,
@@ -1481,6 +1479,8 @@ class _LandingPageState extends ConsumerState<LandingPage> {
             ),
           ),
           const SizedBox(height: 40),
+          _directDownloadButton(isMobile),
+          const SizedBox(height: 24),
           _playStoreButton(isMobile),
         ],
       ),
@@ -1512,7 +1512,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
               ),
               GestureDetector(
                 // onTap: () => _launchURL(
-                //     'https://play.google.com/store/apps/details?id=com.ako.sonus'),
+                //     'https://play.google.com/store/apps/details?id=com.ako.velo'),
                 onTap: () => _showComingSoonMessage(isMobile),
                 child: MouseRegion(
                   cursor: SystemMouseCursors.click,
@@ -1563,12 +1563,33 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     );
   }
 
+  Widget _directDownloadButton(bool isMobile) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => _launchURL(
+            'https://drive.google.com/file/d/1P1x_WECFmsY2DSPZcXofZXvr9SZVyqWA/view?usp=share_link'),
+        child: const GlassContainer(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            radius: 16,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(FontAwesomeIcons.download, color: Colors.white, size: 24),
+                SizedBox(width: 16),
+                Text('Direct Download'),
+              ],
+            )),
+      ),
+    );
+  }
+
   Widget _playStoreButton(bool isMobile) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         // onTap: () => _launchURL(
-        //     'https://play.google.com/store/apps/details?id=com.ako.sonus'),
+        //     'https://play.google.com/store/apps/details?id=com.ako.velo'),
         onTap: () => _showComingSoonMessage(isMobile),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),

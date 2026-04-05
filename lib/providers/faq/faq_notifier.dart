@@ -1,17 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:velo_web/config/app_config.dart';
 import 'faq_state.dart';
 
 class FAQNotifier extends StateNotifier<FAQState> {
   FAQNotifier() : super(FAQState.initial());
 
-  static String get formspreeId =>
-      dotenv.get('FORMSPREE_ID', fallback: 'meerbnjk');
-  static String get apiEndpoint =>
-      dotenv.get('APIENDPOINT', fallback: 'https://formspree.io/f/');
+  static String get formspreeId => AppConfig.formspreeId;
+  static String get apiEndpoint => AppConfig.formspreeApiEndpoint;
 
   Future<void> submitQuestion({
     required String name,
